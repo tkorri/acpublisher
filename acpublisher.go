@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 )
 
-const versionString = "1.0.0"
+const versionString = "1.0.1"
 
 const (
 	baseURL    = "https://api.appcenter.ms"
@@ -39,6 +39,8 @@ const (
 	ReleaseNotes     = "releasenotes"
 	ReleaseNotesFile = "releasenotesfile"
 	Group            = "group"
+	Mandatory        = "mandatory"
+	NotifyTesters    = "notifytesters"
 	Verbose          = "verbose"
 	Debug            = "debug"
 )
@@ -59,6 +61,8 @@ func main() {
 	uploadCommand.AddString(ReleaseNotes, "Uploaded with acpublisher", "Optional. Release notes")
 	uploadCommand.AddString(ReleaseNotesFile, "", "Optional. Path to file containing release notes")
 	uploadCommand.AddStringArray(Group, []string{}, "Optional. Id of the group where to distribute this release. Multiple groups can be set with multiple group arguments")
+	uploadCommand.AddBool(Mandatory, false, "Optional. Mark this release as a mandatory update")
+	uploadCommand.AddBool(NotifyTesters, false, "Optional. Notify testers in given groups about the new release")
 	uploadCommand.AddBool(Verbose, false, "Optional. Enable verbose logging")
 	uploadCommand.AddBool(Debug, false, "Optional. Enable debug logging")
 
@@ -247,7 +251,13 @@ func handleUploadApkCommand(upload *command.Command) {
 	if len(upload.GetStringArray(Group)) > 0 {
 		log.I("Publishing release %s to group(s)...", response.ReleaseId)
 		for _, group := range upload.GetStringArray(Group) {
-			_, err = publishRelease(appSlug, upload.GetString(Token), response.ReleaseId, "groups", group)
+			_, err = publishRelease(appSlug,
+				upload.GetString(Token),
+				response.ReleaseId,
+				"groups",
+				group,
+				upload.GetBool(Mandatory),
+				upload.GetBool(NotifyTesters))
 			if err != nil {
 				log.E("Publishing FAILED\n%s", err)
 				os.Exit(1)
@@ -377,11 +387,15 @@ func updateRelease(appSlug string, apiToken string, releaseId string, releaseNot
 	return &response, nil
 }
 
-func publishRelease(appSlug string, apiToken string, releaseId string, destinationType string, destinationId string) (*ReleaseDestinationResponse, error) {
+func publishRelease(appSlug string, apiToken string, releaseId string, destinationType string, destinationId string, mandatoryUpdate bool, notifyTesters bool) (*ReleaseDestinationResponse, error) {
 	publishUrl := baseURL + "/" + apiVersion + "/apps/" + appSlug + "/releases/" + releaseId + "/" + destinationType
 	log.D("Publishing to %s %s", destinationType, destinationId)
 
-	request := ReleaseDestinationRequest{Id: destinationId}
+	request := ReleaseDestinationRequest{
+		Id:              destinationId,
+		MandatoryUpdate: &mandatoryUpdate,
+		NotifyTesters:   &notifyTesters,
+	}
 	response := ReleaseDestinationResponse{}
 
 	err := jsonRequest(http.MethodPost, publishUrl, &request, apiToken, http.StatusCreated, &response)
@@ -495,7 +509,7 @@ type ReleaseUploadEndResponse struct {
 
 type ReleaseUpdateRequest struct {
 	ReleaseNotes    string `json:"release_notes,omitempty"`
-	MandatoryUpdate bool   `json:"mandatory_update,omitempty"`
+	MandatoryUpdate *bool   `json:"mandatory_update,omitempty"`
 	Destinations    *[]struct {
 		Id   string `json:"id,omitempty"`
 		Name string `json:"name,omitempty"`
@@ -505,15 +519,15 @@ type ReleaseUpdateRequest struct {
 		CommitHash    string `json:"commit_hash,omitempty"`
 		CommitMessage string `json:"commit_message,omitempty"`
 	} `json:"build,omitempty"`
-	NotifyTesters bool `json:"notify_testers,omitempty"`
+	NotifyTesters *bool `json:"notify_testers,omitempty"`
 	Metadata      *struct {
 		DsaSignature string `json:"dsa_signature,omitempty"`
 	} `json:"metadata,omitempty"`
 }
 
 type ReleaseUpdateResponse struct {
-	Enabled               bool   `json:"enabled,omitempty"`
-	MandatoryUpdate       bool   `json:"mandatory_update,omitempty"`
+	Enabled               *bool   `json:"enabled,omitempty"`
+	MandatoryUpdate       *bool   `json:"mandatory_update,omitempty"`
 	ReleaseNotes          string `json:"release_notes,omitempty"`
 	ProvisioningStatusUrl string `json:"provisioning_status_url,omitempty"`
 	Destinations          *[]struct {
@@ -524,8 +538,8 @@ type ReleaseUpdateResponse struct {
 
 type ReleaseDestinationRequest struct {
 	Id              string `json:"id"`
-	MandatoryUpdate bool   `json:"mandatory_update,omitempty"`
-	NotifyTesters   bool   `json:"notify_testers,omitempty"`
+	MandatoryUpdate *bool   `json:"mandatory_update,omitempty"`
+	NotifyTesters   *bool   `json:"notify_testers,omitempty"`
 }
 
 type ReleaseDestinationResponse struct {

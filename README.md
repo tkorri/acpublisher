@@ -25,8 +25,12 @@ ProGuard mapping files.
             Optional. Enable debug logging
       -group value
             Optional. Id of the group where to distribute this release. Multiple groups can be set with multiple group arguments
+      -mandatory
+            Optional. Mark this release as a mandatory update
       -mapping string
             Optional. Path to ProGuard mapping file to upload
+      -notifytesters
+            Optional. Notify testers in given groups about the new release
       -owner string
             Required. Name of the application owner organization or user. This is can be found from the web url: https://appcenter.ms/users/{owner}/apps/{app} or https://appcenter.ms/orgs/{owner}/apps/{app}
       -releasenotes string
