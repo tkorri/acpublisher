@@ -9,7 +9,7 @@ Proguard mapping files.
 
 ## Install
 
-    go get github.com/tkorri/acpublisher@v1.0.0
+    GO111MODULE=on go get github.com/tkorri/acpublisher@v1.0.0
     
 ## Usage
 
