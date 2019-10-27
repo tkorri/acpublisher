@@ -1,0 +1,32 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: acpublisher
+env:
+  - GO111MODULE=on
+  - GOPROXY=https://proxy.golang.org
+before:
+  hooks:
+    - go mod download
+builds:
+  - binary: acpublisher
+    goos:
+      - linux
+    goarch:
+      - amd64
+release:
+  draft: true
+archives:
+  - replacements:
+      linux: Linux
+      amd64: x86_64
+nfpms:
+  - id: "acpublisher"
+    formats:
+      - deb
+    homepage: "https://www.tanelikorri.com/"
+    maintainer: "Taneli Korri"
+    description: "Simple command line tool for publishing resources to Microsoft AppCenter"
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      linux: Linux

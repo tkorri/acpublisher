@@ -1,15 +1,11 @@
-acpublisher - Command line tool for publishing to AppCenter
-===========================================================
+acpublisher
+===========
 
 acpublisher is a super simple command line tool for publishing apk files to
 Microsoft AppCenter.
 
 Currently the tool supports apk upload, release notes, publishing to groups and
-Proguard mapping files.
-
-## Install
-
-    GO111MODULE=on go get github.com/tkorri/acpublisher@v1.0.0
+ProGuard mapping files.
     
 ## Usage
 
@@ -17,7 +13,7 @@ Proguard mapping files.
     Supported commands
         uploadApk    Upload APK to AppCenter
 
-uploadApk command help
+### uploadApk command help
 
     Usage: ./acpublisher uploadApk [<args>]
     Supported arguments
@@ -42,7 +38,7 @@ uploadApk command help
       -verbose
             Optional. Enable verbose logging
 
-Example call
+### Example call
 
     acpublisher uploadApk
                 -token 1234567890123456789012345678901234567890 \
