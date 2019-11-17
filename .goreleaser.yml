@@ -26,6 +26,7 @@ nfpms:
     homepage: "https://www.tanelikorri.com/"
     maintainer: "Taneli Korri"
     description: "Simple command line tool for publishing resources to Microsoft AppCenter"
+    license: Apache 2.0
     name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
     replacements:
       amd64: 64bit
